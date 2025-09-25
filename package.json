@@ -1,0 +1,19 @@
+{
+  "name": "devtindebackend",
+  "version": "1.0.0",
+  "description": "tinderfordevs",
+  "main": "index.js",
+  "scripts": {
+    "start":"node src/app.js",
+    "dev":"nodemon  src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "nodejs,javascript"
+  },
+  "author": "swamy",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

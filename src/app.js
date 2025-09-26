@@ -1,22 +1,33 @@
 const express=require("express");
 const app=express();
 
-app.get("/user",(req,res)=>{
-    res.send({firstname:"Swamy"});
+app.use("/admin",(req,res,next)=>{
+    console.log("checking Auth")
+    const Aut="xyz";
+    const isadminAut=Aut==="xyz";
+    if(!isadminAut)
+    {
+        res.status(404).send("admin is fake");
+    }
+    else{
+        next();
+    }
 })
-app.post("/user",(req,res)=>{
-    // need to connect to database
-    res.send("successfully connected to databse")
+app.get("/admin/info",(req,res,next)=>{
+    console.log("adminInfo")
+    res.send("info is correct")
 })
-app.delete("/user",(req,res)=>{
-    res.send("deleted ")
+app.get("/admin/bio",(req,res)=>{
+     console.log("adminbio")
+    res.send("bio is correct");
 })
-app.use(("/test",(req,res)=>{
-    res.send("hello");
-}));
-app.use("/user",(req,res)=>{
-    res.send("hahaha")
+app.get("/admin/deleteadmin",(req,res)=>{
+    res.send("deleted successfully");
 })
+    
+    
+
+
 app.listen(3000,()=>{
     console.log("server is successfully listening on port 3000");
 });

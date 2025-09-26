@@ -1,17 +1,13 @@
 const express=require("express");
 const app=express();
+const {isadminAut,userAuth}=require("./Middlewares/adminAuth")
+const {errorHandling}=require("./errorHandling")
 
-app.use("/admin",(req,res,next)=>{
-    console.log("checking Auth")
-    const Aut="xyz";
-    const isadminAut=Aut==="xyz";
-    if(!isadminAut)
-    {
-        res.status(404).send("admin is fake");
-    }
-    else{
-        next();
-    }
+app.use("/admin",isadminAut)
+
+app.get("/user",userAuth,(req,res)=>{
+    console.log("step-3")
+    res.send("user data is fetched")
 })
 app.get("/admin/info",(req,res,next)=>{
     console.log("adminInfo")
@@ -22,11 +18,11 @@ app.get("/admin/bio",(req,res)=>{
     res.send("bio is correct");
 })
 app.get("/admin/deleteadmin",(req,res)=>{
-    res.send("deleted successfully");
+   throw("error")
 })
     
     
-
+app.use("/",errorHandling)
 
 app.listen(3000,()=>{
     console.log("server is successfully listening on port 3000");

@@ -1,23 +1,55 @@
 const mongoose=require("mongoose")
-const UserSchema=mongoose.Schema({
+const UserSchema=new mongoose.Schema({
     firstName:{
-        type:String
+        type:String,
+        required:true,
+        minlength:4
+
     },
     lastName:{
         type:String
     },
-    emailId:{
-        type:String
+    emailID:{
+        type:String,
+          required:true,
+          unique:true,
+          lowercase:true,
+          trim:true
     },
     password:{
-        type:String
+        type:String,
+        required:true,
+
     },
     gender:{
-        type:String
+        type:String,
+        enum:["male","female","other"]
     },
     age:{
-        type:Number
+        type:Number,
+        min:18
+    },
+    bio:{
+        type:String,
+        default:"welcome to devTinder"
+    },
+    skills:{
+        type:[String]
+    },
+    winpercentage:{
+        type:Number,
+        validate(value){
+            if(value<40)
+            {
+                throw new Error("not allowed to get captaincy")
+            }
+            
+        }
     }
+},{
+
+timestamps:true
+
 })
 
 const User=mongoose.model("User",UserSchema);

@@ -16,7 +16,7 @@ app.post("/signup",async(req,res)=>{
     res.send("successfully added data to DB")
    }catch(err)
    {
-    res.status(404).send("someThing wrong")
+    res.status(404).send("someThing wrong "+err)
    }
 })
 // retreives the one the data from document
@@ -60,6 +60,21 @@ app.delete("/user",async(req,res)=>{
         
     }catch(err){
         res.status(404).send("error")
+    }
+})
+
+app.patch("/user",async(req,res)=>{
+    const userId=req.body.userId;
+    const data=req.body;
+    try{
+        const user=await User.findByIdAndUpdate(userId,data,{
+            returnDocument:"After",
+            runValidators:true
+        })
+        res.send("successfully updated   " + user)
+    }
+    catch(err){
+        res.status(404).send("error "+ err)
     }
 })
 

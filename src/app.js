@@ -4,21 +4,64 @@ const ConnectDb=require("./config/database")
 
 const app=express();
 const User=require("./models/user");
-// const { use } = require("react");
+const {validsignup}=require("./utils/validation")
+const bcrypt=require("bcrypt");
+const { Error } = require("mongoose");
 
 
 app.use(express.json());
 
 app.post("/signup",async(req,res)=>{
-    const user=new User(req.body)
+    const {firstName,lastName,emailID,password}=req.body;
    try{
+    // validating the data
+      validsignup(req)
+    
+    //  encrypting the password into hash
+        
+        const hasedpassword=await bcrypt.hash(password,10);
+        console.log(hasedpassword)
+    // saving it into db 
+    const user=new User({
+        firstName,
+        lastName,
+        emailID,
+        password:hasedpassword
+    });
     await user.save();
     res.send("successfully added data to DB")
    }catch(err)
    {
-    res.status(404).send("someThing wrong "+err)
+    res.status(404).send("Error : "+err.message)
    }
 })
+
+
+// login user with email and password
+
+app.post("/login",async (req,res)=>{
+ 
+    try{
+        const {emailID,password}=req.body;
+        const user=await User.findOne({emailID: emailID})
+        // console.log(user)
+        if(!user)
+        {
+            throw new Error("invalid email")
+        }
+        const isvalidpassword=await bcrypt.compare(password,user.password);
+        if(isvalidpassword)
+        {
+            res.send("login success")
+        }else{
+            throw new Error("password is invalid ")
+        }
+    }catch(err){
+          res.status(404).send("ERROR : "+err.message)
+    }
+    
+})
+
 // retreives the one the data from document
 app.get("/info",async(req,res)=>{
     const userpassword=req.body.password;
@@ -38,6 +81,8 @@ app.get("/info",async(req,res)=>{
     res.send("error")
    }
 })
+
+
 // retreives the all the data from document
 app.get("/feed",async(req,res)=>{
     // const userdata=req.body;
@@ -52,6 +97,7 @@ app.get("/feed",async(req,res)=>{
 
 })
 
+
 app.delete("/user",async(req,res)=>{
     const userName=req.body.firstName;
     try{
@@ -63,9 +109,29 @@ app.delete("/user",async(req,res)=>{
     }
 })
 
-app.patch("/user",async(req,res)=>{
-    const userId=req.body.userId;
+
+app.patch("/user/:userId",async(req,res)=>{
+    const userId=req.params?.userId;
     const data=req.body;
+    const allowedUpdates=[
+       "userId",
+       "firstName",
+       "lastName",
+       "password",
+       "userId",
+       "skills"
+    ]
+    const isupdateallowed=Object.keys(data).every(k=>allowedUpdates.includes(k));
+    console.log(isupdateallowed)
+    if(!isupdateallowed)
+    {
+        res.status(404).send("Updates are not allowed");
+    }
+    if(data?.skills.length>10)
+    {
+        // throw new Error("you can not add more than 10 skills")
+        throw new Error("you can not add more than 10 skills")
+    }
     try{
         const user=await User.findByIdAndUpdate(userId,data,{
             returnDocument:"After",

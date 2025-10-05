@@ -1,4 +1,5 @@
 const mongoose=require("mongoose")
+const validator=require("validator")
 const UserSchema=new mongoose.Schema({
     firstName:{
         type:String,
@@ -14,16 +15,27 @@ const UserSchema=new mongoose.Schema({
           required:true,
           unique:true,
           lowercase:true,
-          trim:true
+          trim:true,
+        //  validate(value){
+        //     if(!validator.isEmail(value)){
+        //         throw new Error("enter correct Email ")
+        //     }
+        //  }
     },
     password:{
         type:String,
         required:true,
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("set new strong password")
+            }
+        }
 
     },
     gender:{
         type:String,
         enum:["male","female","other"]
+
     },
     age:{
         type:Number,
@@ -32,19 +44,6 @@ const UserSchema=new mongoose.Schema({
     bio:{
         type:String,
         default:"welcome to devTinder"
-    },
-    skills:{
-        type:[String]
-    },
-    winpercentage:{
-        type:Number,
-        validate(value){
-            if(value<40)
-            {
-                throw new Error("not allowed to get captaincy")
-            }
-            
-        }
     }
 },{
 

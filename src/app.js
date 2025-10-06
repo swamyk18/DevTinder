@@ -1,22 +1,25 @@
 
 const express=require("express")
 const ConnectDb=require("./config/database")
-
+const cookieParser=require("cookie-parser")
+const jwt=require("jsonwebtoken")
 const app=express();
 const User=require("./models/user");
 const {validsignup}=require("./utils/validation")
 const bcrypt=require("bcrypt");
 const { Error } = require("mongoose");
+const {userAuth}=require("./Middlewares/auth")
 
 
 app.use(express.json());
+app.use(cookieParser())
 
 app.post("/signup",async(req,res)=>{
     const {firstName,lastName,emailID,password}=req.body;
    try{
     // validating the data
       validsignup(req)
-    
+
     //  encrypting the password into hash
         
         const hasedpassword=await bcrypt.hash(password,10);
@@ -36,9 +39,7 @@ app.post("/signup",async(req,res)=>{
    }
 })
 
-
 // login user with email and password
-
 app.post("/login",async (req,res)=>{
  
     try{
@@ -49,9 +50,16 @@ app.post("/login",async (req,res)=>{
         {
             throw new Error("invalid email")
         }
-        const isvalidpassword=await bcrypt.compare(password,user.password);
+        const isvalidpassword=await user.validatepassword(password);
         if(isvalidpassword)
         {
+
+            // create a jwt Token
+             const token=await user.getJWT();
+
+           
+            // Add the Token to the cookie and send back to the user  
+            res.cookie("token",token);
             res.send("login success")
         }else{
             throw new Error("password is invalid ")
@@ -61,6 +69,26 @@ app.post("/login",async (req,res)=>{
     }
     
 })
+    // get profile info
+
+    app.get("/profile",userAuth,async(req,res)=>{
+        try{
+        const user=req.user
+        if(!user){
+          throw new Error("User does not exist")
+        }
+        else{
+            console.log("success")
+            res.send(user)
+        }
+        
+        }catch(err){
+            res.status(404).send("Error :"+err)
+        }
+    })
+
+
+
 
 // retreives the one the data from document
 app.get("/info",async(req,res)=>{

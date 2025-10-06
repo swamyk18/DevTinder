@@ -10,7 +10,7 @@ authRouter.post("/signup",async(req,res)=>{
    try{
         validsignup(req)
         const hasedpassword=await bcrypt.hash(password,10);
-        console.log(hasedpassword)
+        // console.log(hasedpassword)
         const user=new User({
         firstName,
         lastName,

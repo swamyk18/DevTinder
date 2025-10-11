@@ -14,7 +14,16 @@ const validsignup=(req)=>{
     }
     
 }
-
+const validateProfileData=async (req,res)=>{
+    const allowedEditFields=[
+        "firstName",
+        "lastName",
+        "emailID",
+        "password"
+    ]
+    const isEditallowed=await Object.keys(req.body).every(field=>allowedEditFields.includes(field))
+    return isEditallowed;
+}           
 module.exports={
-    validsignup
+    validsignup,validateProfileData
 }

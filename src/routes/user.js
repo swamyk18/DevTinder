@@ -103,4 +103,8 @@ userRequest.get("/user/feed",userAuth,async(req,res)=>{
   }
 })
 
+userRequest.get("/user/likes",userAuth,async(req,res)=>{
+    res.send("hello")
+})
+
 module.exports=userRequest;

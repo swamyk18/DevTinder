@@ -58,7 +58,7 @@ userRequest.get("/user/request/connections",userAuth,async(req,res)=>{
     }
 })
 
-
+// feed Router
 userRequest.get("/user/feed",userAuth,async(req,res)=>{
   try{
 
@@ -102,4 +102,5 @@ userRequest.get("/user/feed",userAuth,async(req,res)=>{
     res.status(400).send("ERROR: "+err)
   }
 })
+
 module.exports=userRequest;

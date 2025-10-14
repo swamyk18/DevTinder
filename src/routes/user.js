@@ -2,7 +2,11 @@
 const express=require('express');
 const { userAuth } = require('../Middlewares/auth');
 const ConnectionRequest = require('../models/connectionrequest');
+const { set } = require('mongoose');
 const userRequest=express.Router();
+const User=require("../models/user")
+const USER_SAFE_DATA="firstName lastName bio "
+
 
 userRequest.get("/user/request/recevied",userAuth,async(req,res)=>{
     try{
@@ -52,5 +56,50 @@ userRequest.get("/user/request/connections",userAuth,async(req,res)=>{
         res.status(404).send("ERROR: "+err.message)
         console.log(err)
     }
+})
+
+
+userRequest.get("/user/feed",userAuth,async(req,res)=>{
+  try{
+
+      const loggedInUser=req.user;
+        const page=parseInt(req.query.page)
+        let limit=parseInt(req.query.limit)
+        limit=limit>50? 50:limit;
+        const skip=(page-1)*limit;
+
+
+    const connectionrequests=await ConnectionRequest.find({
+        $or:[
+            {
+                fromUserId:loggedInUser._id
+            },
+            {
+                toUserId:loggedInUser._id
+            }
+        ]
+    }).select("fromUserId toUserId")
+
+    const hideconnection=new Set()
+    connectionrequests.forEach((req)=>{
+        hideconnection.add(req.fromUserId.toString());
+        hideconnection.add(req.toUserId.toString());
+    });
+   
+
+    const Userfeed=await User.find({
+        $and:[
+            {_id:{$nin:Array.from(hideconnection)}},
+            {_id:{$ne:loggedInUser._id}}
+        ]
+    }).select(USER_SAFE_DATA).skip(skip).limit(limit)
+
+
+
+    res.send(Userfeed)
+
+  }catch(err){
+    res.status(400).send("ERROR: "+err)
+  }
 })
 module.exports=userRequest;

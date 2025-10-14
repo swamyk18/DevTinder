@@ -1,7 +1,8 @@
 const express=require("express")
 const requestRouter=express.Router();
 const {userAuth}=require("../Middlewares/auth")
-const ConnectionRequest=require("../models/connectionrequest")
+const ConnectionRequest=require("../models/connectionrequest");
+const User = require("../models/user");
 
 
 
@@ -9,11 +10,18 @@ requestRouter.post("/request/send/:status/:toUserId",userAuth,async(req , res)=>
     try{
             const fromUserId=req.user._id;
             const toUserId=req.params.toUserId;
+            const istoUserId=await User.findOne({
+                _id:toUserId
+            })
+            if(!istoUserId)
+            {
+                res.status(400).send("User NotFound")
+            }
             const status=req.params.status;
             const alloweStatus=["intrested","ignored"]
             if(!alloweStatus.includes(status))
             {
-
+                res.status(400).send("invalid status")
             }
             const existingConnectionRequest=await ConnectionRequest.findOne({
                 $or:[
